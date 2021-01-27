@@ -1,12 +1,10 @@
 package com.booking.backend;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
@@ -24,7 +22,10 @@ import javax.persistence.OneToMany;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Booking {
+public class Booking implements Serializable {
+
+    private static final long serialVersionUID = -2338626292552177485L;
+
     private @Id @GeneratedValue Long id;
 
     private String passengerName;

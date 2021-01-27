@@ -27,7 +27,7 @@ public class MessagingConfig {
 
     public static final String BOOKING_DELETE_QUEUE = "BookingDeleteQueue";
     public static final String BOOKING_DELETE = "BookingDelete";
-
+/*
     @Bean
     public Queue messageAuditQueue() { return new Queue(MESSAGE_AUDIT_QUEUE); }
 
@@ -81,5 +81,5 @@ public class MessagingConfig {
         final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         //rabbitTemplate.setMessageConverter(converter());
         return rabbitTemplate;
-    }
+    }*/
 }

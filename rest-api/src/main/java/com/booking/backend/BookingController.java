@@ -1,6 +1,7 @@
 package com.booking.backend;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,11 +37,15 @@ public class BookingController {
 
     @PostMapping
     String addBooking(@RequestBody Booking booking) {
-        rabbitTemplate.convertAndSend(MessagingConfig.MESSAGE_EXCHANGE, MessagingConfig.BOOKING_ADD, booking);
+        rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
+        rabbitTemplate.convertAndSend(MessagingConfig.BOOKING_EXCHANGE, "foo.bar.baz", booking, m -> {
+            m.getMessageProperties().setContentType("application/json");
+            return m;
+        });
         return "Success!!!";
     }
 
-    @PutMapping("/{id}")
+    /*@PutMapping("/{id}")
     String replaceBooking(@RequestBody Booking newBooking, @PathVariable Long id) {
         rabbitTemplate.convertAndSend(MessagingConfig.MESSAGE_EXCHANGE, MessagingConfig.BOOKING_EDIT, newBooking);
         return "Success!!!";
@@ -50,5 +55,5 @@ public class BookingController {
     String deleteBooking(@PathVariable Long id) {
         rabbitTemplate.convertAndSend(MessagingConfig.MESSAGE_EXCHANGE, MessagingConfig.BOOKING_DELETE, id);
         return "Success!!!";
-    }
+    }*/
 }

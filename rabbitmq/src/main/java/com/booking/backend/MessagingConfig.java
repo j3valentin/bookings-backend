@@ -1,13 +1,12 @@
 package com.booking.backend;
 
-import org.springframework.amqp.core.AmqpTemplate;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.FanoutExchange;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
+import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -28,58 +27,46 @@ public class MessagingConfig {
     public static final String BOOKING_DELETE_QUEUE = "BookingDeleteQueue";
     public static final String BOOKING_DELETE = "BookingDelete";
 
-    @Bean
-    public Queue messageAuditQueue() { return new Queue(MESSAGE_AUDIT_QUEUE); }
+    static final String topicExchangeName = "spring-boot-exchange";
+
+    static final String queueName = "spring-boot";
 
     @Bean
-    public FanoutExchange messageExchange() { return new FanoutExchange(MESSAGE_EXCHANGE); }
-
-    @Bean
-    public Binding message(Queue messageAuditQueue, FanoutExchange messageExchange) {
-        return BindingBuilder.bind(messageAuditQueue).to(messageExchange);
+    Queue queue() {
+        return new Queue(BOOKING_ADD_QUEUE, true);
     }
 
     @Bean
-    public DirectExchange bookingExchange() { return new DirectExchange(BOOKING_EXCHANGE); }
-
-    @Bean
-    public Binding booking(DirectExchange bookingExchange, FanoutExchange messageExchange) {
-        return BindingBuilder.bind(bookingExchange).to(messageExchange);
+    TopicExchange exchange() {
+        return new TopicExchange(BOOKING_EXCHANGE);
     }
 
     @Bean
-    public Queue bookingAddQueue() { return new Queue(BOOKING_ADD_QUEUE); }
-
-    @Bean
-    public Binding bookingAdd(Queue bookingAddQueue, DirectExchange bookingExchange) {
-        return BindingBuilder.bind(bookingAddQueue).to(bookingExchange).with(BOOKING_ADD);
+    Binding binding(Queue queue, TopicExchange exchange) {
+        return BindingBuilder.bind(queue).to(exchange).with("foo.bar.#");
     }
 
     @Bean
-    public Queue bookingEditQueue() { return new Queue(BOOKING_EDIT_QUEUE); }
-
-    @Bean
-    public Binding bookingEdit(Queue bookingEditQueue, DirectExchange bookingExchange) {
-        return BindingBuilder.bind(bookingEditQueue).to(bookingExchange).with(BOOKING_EDIT);
+    SimpleMessageListenerContainer container(ConnectionFactory connectionFactory,
+                                             MessageListenerAdapter listenerAdapter) {
+        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+        container.setConnectionFactory(connectionFactory);
+        //container.setQueueNames(BOOKING_ADD_QUEUE, BOOKING_EDIT_QUEUE, BOOKING_DELETE_QUEUE);
+        container.setQueueNames(BOOKING_ADD_QUEUE);
+        container.setMessageListener(listenerAdapter);
+        //listenerAdapter.setMessageConverter(jsonMessageConverter());
+        return container;
     }
 
     @Bean
-    public Queue bookingDeleteQueue() { return new Queue(BOOKING_DELETE_QUEUE); }
-
-    @Bean
-    public Binding bookingDelete(Queue bookingDeleteQueue, DirectExchange bookingExchange) {
-        return BindingBuilder.bind(bookingDeleteQueue).to(bookingExchange).with(BOOKING_DELETE);
+    public MessageConverter jsonMessageConverter(){
+        return new Jackson2JsonMessageConverter();
     }
 
-    //@Bean
-    //public MessageConverter converter() {
-    //    return new Jackson2JsonMessageConverter();
-    //}
-
     @Bean
-    public AmqpTemplate template(ConnectionFactory connectionFactory) {
-        final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-        //rabbitTemplate.setMessageConverter(converter());
-        return rabbitTemplate;
+    MessageListenerAdapter listenerAdapter(Receiver receiver) {
+        MessageListenerAdapter messageListenerAdapter = new MessageListenerAdapter(receiver, "receiveMessage");
+        messageListenerAdapter.setMessageConverter(jsonMessageConverter());
+        return messageListenerAdapter;
     }
 }

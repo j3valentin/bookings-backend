@@ -6,21 +6,21 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component
+//@Component
 public class BookingMessageConsumer {
-    private static final Logger log = LoggerFactory.getLogger(BookingMessageConsumer.class);
-
-    private final BookingRepository bookingRepository;
-
-    @Autowired
-    public BookingMessageConsumer(BookingRepository bookingRepository) {
-        this.bookingRepository = bookingRepository;
-    }
-
-    @RabbitListener(queues = MessagingConfig.BOOKING_ADD)
-    public void addBooking(Booking booking) {
-        log.info("Message received from addBooking " + booking);
-    }
+//    private static final Logger log = LoggerFactory.getLogger(BookingMessageConsumer.class);
+//
+//    private final BookingRepository bookingRepository;
+//
+//    @Autowired
+//    public BookingMessageConsumer(BookingRepository bookingRepository) {
+//        this.bookingRepository = bookingRepository;
+//    }
+//
+//    @RabbitListener(queues = MessagingConfig.BOOKING_ADD)
+//    public void addBooking(Booking booking) {
+//        log.info("Message received from addBooking " + booking);
+//    }
 
     //@RabbitListener(queues = MessagingConfig.BOOKING_EDIT)
     //public void editBooking(Booking booking) {
