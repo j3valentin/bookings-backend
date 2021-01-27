@@ -37,16 +37,13 @@ public class BookingController {
 
     @PostMapping
     String addBooking(@RequestBody Booking booking) {
-        rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
-        rabbitTemplate.convertAndSend(MessagingConfig.BOOKING_EXCHANGE, "foo.bar.baz", booking, m -> {
-            m.getMessageProperties().setContentType("application/json");
-            return m;
-        });
+        rabbitTemplate.convertAndSend(MessagingConfig.BOOKING_EXCHANGE, MessagingConfig.BOOKING_ADD, booking);
         return "Success!!!";
     }
 
-    /*@PutMapping("/{id}")
+    @PutMapping("/{id}")
     String replaceBooking(@RequestBody Booking newBooking, @PathVariable Long id) {
+        newBooking.setId(id);
         rabbitTemplate.convertAndSend(MessagingConfig.MESSAGE_EXCHANGE, MessagingConfig.BOOKING_EDIT, newBooking);
         return "Success!!!";
     }
@@ -55,5 +52,5 @@ public class BookingController {
     String deleteBooking(@PathVariable Long id) {
         rabbitTemplate.convertAndSend(MessagingConfig.MESSAGE_EXCHANGE, MessagingConfig.BOOKING_DELETE, id);
         return "Success!!!";
-    }*/
+    }
 }

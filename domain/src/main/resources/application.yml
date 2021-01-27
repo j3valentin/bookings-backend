@@ -1,0 +1,11 @@
+spring:
+  h2:
+    console:
+      enabled: true
+
+  datasource:
+    hikari:
+      connection-test-query: SELECT 1 FROM DUAL
+
+    driver-class-name: org.h2.Driver
+    jdbc-url: jdbc:h2:mem:testdb
